@@ -1,6 +1,5 @@
 import math
 import numpy as np
-import matplotlib.pyplot as plt
 
 @np.vectorize
 def g(x):
@@ -16,7 +15,7 @@ class Network:
     'Primitive activation linear neural network'
     
     def __init__(self, layer_sizes):
-        'init network my random wight using given layer sizes'
+        'init network specified by give sizes and initialize it by random wights'
         self.layers=[]
         self.activations = {}
         # init by random values
