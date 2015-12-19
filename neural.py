@@ -6,7 +6,6 @@ def g(x):
     'Activation function'
     return 1/(1+math.exp(-x))
     
-@np.vectorize
 def dg(g):
     'calculates dg/dx by given g(x)'
     return g*(1-g)
@@ -18,6 +17,8 @@ class Network:
         'init network specified by give sizes and initialize it by random wights'
         self.layers=[]
         self.activations = {}
+        self.delta = {}
+        self.df = {}
         # init by random values
         for i in range(1, len(layer_sizes)):
             random_array = np.random.rand(layer_sizes[i], layer_sizes[i-1] + 1)
@@ -38,16 +39,33 @@ class Network:
         
     def backward(self, y):
         'make a correction of weights based on expectations for last result'
-        
+        y = np.matrix.transpose(y)
+
         @np.vectorize
         def distance(y, a):
             'Distance between elements'
             return ((y - a) ** 2)/2
+
+        @np.vectorize
+        def calcdeltal(y, a):
+            'Calculate delta on layer L (output layer)'
+            return - (y - a) * dg(a)
+
+        L = len(self.layers)
+        delta = calcdeltal(y, self.activations[L])
         
-        y = np.matrix.transpose(y)
+        self.delta[L] = delta;
+
+        a = np.vstack([[1], self.activations[L-1]])
+        df = delta * np.matrix.transpose(a)
+        self.df[L] = df
+        f = self.layers[L-1]
+        
         E = distance(y, self.result());
         Etotal = sum(E)
         print(Etotal)
+
+
         
         # Backward pass for output layer
         
@@ -55,6 +73,6 @@ class Network:
 
 net = Network([5, 10, 2])
 
-print(net.forward(np.asmatrix([1,2,3,4,5])))
+net.forward(np.asmatrix([1,2,3,4,5]))
 
 net.backward(np.asmatrix([0,1]))
