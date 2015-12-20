@@ -1,6 +1,8 @@
 import math
 import numpy as np
 
+
+
 @np.vectorize
 def g(x):
     'Activation function'
@@ -15,27 +17,30 @@ class Network:
     
     def __init__(self, layer_sizes : list):
         'init network specified by give sizes and initialize it by random wights'
-        self.fi=[] # weights of network
+        self.fi={} # weights of network
         self.a = {} # output activation from neurons
         self.delta = {} # delta function
         self.df = {} # corection for weights
+        self.L = len(layer_sizes) # number of layers: including input and output
 
         # init by random values
-        for i in range(1, len(layer_sizes)):
-            random_array = np.random.rand(layer_sizes[i], layer_sizes[i-1] + 1)
-            self.fi.append(np.asmatrix(random_array))
+        for l in range(1, self.L):
+            random_array = np.random.rand(layer_sizes[l], layer_sizes[l-1] + 1)
+            fi = np.asmatrix(random_array)
+            self.fi[l] = fi 
+            # print("Layer : ", l, ", Generated matrix shape: ", np.shape(fi))
             
     def result(self):
         'calculated result of forward propogation'
-        return self.a[len(self.fi)]
+        return self.a[self.L-1]
 
     def forward(self, x):
         'calculate the result of forward propogation'
         self.a[0] = np.matrix.transpose(x)
-        for l in range(0, len(self.fi)):
-            inp = np.vstack([np.asmatrix([1]), self.a[l]])
+        for l in range(1, self.L):
+            inp = np.vstack([[1], self.a[l-1]])
             z = self.fi[l] * inp
-            self.a[l+1] = g(z)
+            self.a[l] = g(z)
         return self.result()
         
     def backward(self, y):
@@ -63,7 +68,7 @@ class Network:
         df = delta * np.matrix.transpose(a)
         self.df[L] = df
         
-        # Calculate backprop for all hidden layer
+        # Calculate backprop for all hidden layers
 
         for l in range(L-1, 0, -1):
             print (l)
