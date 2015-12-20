@@ -1,17 +1,7 @@
 import math
 import numpy as np
 
-
-
-@np.vectorize
-def g(x):
-    'Activation function'
-    return 1/(1+math.exp(-x))
-    
-def dg(g):
-    'calculates dg/dx by given g(x)'
-    return g*(1-g)
-
+  
 class Network:
     'Primitive activation linear neural network'
     
@@ -36,6 +26,11 @@ class Network:
 
     def forward(self, x):
         'calculate the result of forward propogation'
+        @np.vectorize
+        def g(x):
+            'Activation function'
+            return 1/(1+math.exp(-x))
+
         self.a[0] = np.matrix.transpose(x)
         for l in range(1, self.L):
             inp = np.vstack([[1], self.a[l-1]])
@@ -54,6 +49,10 @@ class Network:
             return ((y - a) ** 2)/2
 
         # Calculate backpropogation step for output layer
+
+        def dg(g):
+            'calculates dg/dx by given g(x)'
+            return g*(1-g)
 
         @np.vectorize
         def calcdeltal(y, a):
