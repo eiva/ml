@@ -62,22 +62,42 @@ class Network:
         a = np.vstack([[1], self.a[L-1]])
         df = delta * np.matrix.transpose(a)
         self.df[L] = df
-        f = self.fi[L-1]
-
+        
         # Calculate backprop for all hidden layer
 
-        def calcsum(delta, fi):
-            'calculate dE/dA^(l-1)'
-            sum = 0
-            todo
-        
+        for l in range(L-1, 0, -1):
+            print (l)
+            fi_l = self.fi[l]
+            delta_l = self.delta[l+1]
+            sum_d_fi = np.matrix.transpose(fi_l) * delta_l
+
+            @np.vectorize
+            def calcdelta(s, a):
+                'Calculate delta on layer l (hidden layer)'
+                return s * dg(a)
+
+            a = np.vstack([[1], self.a[l]])
+            delta = calcdelta(sum_d_fi, a)
+            self.delta[l] = delta
+
+            a = np.vstack([[1], self.a[l+1]])
+
+            df = delta * np.matrix.transpose(a)
+
+            self.df[l] = df
+
+            print("df = ", np.shape(self.df[l]))
+            print("f = ", np.shape(self.df[l]))
+
+        # result
+               
         E = distance(y, self.result());
         Etotal = sum(E)
         print(Etotal)
         
         
 
-net = Network([5, 10, 2])
+net = Network([5, 10, 10, 2])
 
 net.forward(np.asmatrix([1,2,3,4,5]))
 
