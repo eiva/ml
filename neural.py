@@ -1,7 +1,8 @@
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
-  
+
 class Network:
     'Primitive activation linear neural network'
     
@@ -100,22 +101,32 @@ class Network:
         # adjust weights
 
         for l in range(1, self.L):
-            self.fi[l] -= 10*self.df[l]
+            self.fi[l] -= 10*self.df[l] # extract alpha (gradient speed) as parameter.
                
+        # calculate error
         E = distance(y, self.result());
         Etotal = sum(E)
-        print(Etotal)
-        
+        #print(Etotal)
+        return Etotal[0,0]
         
 
-net = Network([2, 10, 11, 10, 1])
+net = Network([2, 3, 3, 3, 1])
 
-for i in range(0, 10000):
+er=[]
+
+for i in range(0, 600):
     net.forward(np.asmatrix([1, 1]))
-    net.backward(np.asmatrix([1]))
+    e=net.backward(np.asmatrix([1]))
     net.forward(np.asmatrix([0, 0]))
-    net.backward(np.asmatrix([0]))
+    e+=net.backward(np.asmatrix([0]))
     net.forward(np.asmatrix([1, 0]))
-    net.backward(np.asmatrix([0]))
+    e+=net.backward(np.asmatrix([0]))
     net.forward(np.asmatrix([0, 1]))
-    net.backward(np.asmatrix([0]))
+    e+=net.backward(np.asmatrix([0]))
+    er.append(e)
+
+ #Graphic display
+plt.plot(range(0,len(er)), er, 'r-', label='Error')
+plt.legend()
+#plt.savefig('test.png', bbox_inches='tight')
+plt.show() 
