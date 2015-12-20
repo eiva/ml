@@ -99,22 +99,28 @@ class Network:
             #print("f = ", np.shape(self.df[l]))
 
         # adjust weights
-
-        for l in range(1, self.L):
-            self.fi[l] -= 10*self.df[l] # extract alpha (gradient speed) as parameter.
+               
                
         # calculate error
         E = distance(y, self.result());
         Etotal = sum(E)
+        Etotal = Etotal[0,0]
+
+        alpha = Etotal * 15 # extract alpha (gradient speed) as parameter.
+
+        for l in range(1, self.L):
+            self.fi[l] -= alpha*self.df[l]
+
+
         #print(Etotal)
-        return Etotal[0,0]
+        return Etotal
         
 
-net = Network([2, 3, 3, 3, 1])
+net = Network([2, 3, 10, 3, 1])
 
 er=[]
 
-for i in range(0, 600):
+for i in range(0, 5000):
     net.forward(np.asmatrix([1, 1]))
     e=net.backward(np.asmatrix([1]))
     net.forward(np.asmatrix([0, 0]))
