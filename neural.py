@@ -41,6 +41,7 @@ class Network:
             inp = np.vstack([[1], self.a[l-1]])
             z = self.fi[l] * inp
             self.a[l] = g(z)
+        #print ("Result = ", self.result())
         return self.result()
         
     def backward(self, y):
@@ -59,7 +60,7 @@ class Network:
             'Calculate delta on layer L (output layer)'
             return - (y - a) * dg(a)
 
-        L = len(self.fi)
+        L = self.L - 1
         delta = calcdeltal(y, self.a[L])
         
         self.delta[L] = delta;
@@ -71,10 +72,12 @@ class Network:
         # Calculate backprop for all hidden layers
 
         for l in range(L-1, 0, -1):
-            print (l)
-            fi_l = self.fi[l]
+            #print (l)
+            fi_l = self.fi[l+1]
             delta_l = self.delta[l+1]
             sum_d_fi = np.matrix.transpose(fi_l) * delta_l
+
+            #sum_d_fi = np.matrix.transpose(np.matrix.transpose(delta_l) * fi_l)
 
             @np.vectorize
             def calcdelta(s, a):
@@ -83,18 +86,22 @@ class Network:
 
             a = np.vstack([[1], self.a[l]])
             delta = calcdelta(sum_d_fi, a)
+            delta = delta[1:,:] # throw away first index (TODO: need to skip it on delta sums calculation)
             self.delta[l] = delta
 
-            a = np.vstack([[1], self.a[l+1]])
-
+            a = np.vstack([[1], self.a[l-1]])
             df = delta * np.matrix.transpose(a)
 
             self.df[l] = df
+            #print("Layer: ", l)
+            #print("Correction: ", df)
+            #print("df = ", np.shape(self.df[l]))
+            #print("f = ", np.shape(self.df[l]))
 
-            print("df = ", np.shape(self.df[l]))
-            print("f = ", np.shape(self.df[l]))
+        # adjust weights
 
-        # result
+        for l in range(1, self.L):
+            self.fi[l] -= 10*self.df[l]
                
         E = distance(y, self.result());
         Etotal = sum(E)
@@ -102,8 +109,14 @@ class Network:
         
         
 
-net = Network([5, 10, 10, 2])
+net = Network([2, 10, 11, 10, 1])
 
-net.forward(np.asmatrix([1,2,3,4,5]))
-
-net.backward(np.asmatrix([0,1]))
+for i in range(0, 10000):
+    net.forward(np.asmatrix([1, 1]))
+    net.backward(np.asmatrix([1]))
+    net.forward(np.asmatrix([0, 0]))
+    net.backward(np.asmatrix([0]))
+    net.forward(np.asmatrix([1, 0]))
+    net.backward(np.asmatrix([0]))
+    net.forward(np.asmatrix([0, 1]))
+    net.backward(np.asmatrix([0]))
